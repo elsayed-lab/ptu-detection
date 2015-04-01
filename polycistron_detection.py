@@ -63,12 +63,12 @@ def main():
     # create a list to keep track of BED file output rows
     bed_rows = []
 
-    # PTU counter
-    ptu_counter = 1
-
     # iterate through chromosomes and segment genes
     for chr_name in genes.seqname.unique():
-        chr_genes = genes[genes.seqname == chr_name].reset_index()
+        chr_genes = genes[genes.seqname == chr_name]
+
+        # resort by location (snoRNAs, etc. sometimes follow genes in GFF)
+        chr_genes = chr_genes.sort('start').reset_index()
 
         with warnings.catch_warnings():
             # parse gene IDs
@@ -112,19 +112,21 @@ def main():
         output = output.append(chr_genes[cols])
 
         # add bed entries
-        win_size = 'med_9'
+        for win_size in ["med_%d" % x for x in window_sizes]:
+            # PTU counter
+            ptu_counter = 1
 
-        for ptu in chr_genes[win_size].unique():
-            ptu_name = "PTU%03d" % ptu_counter
-            ptu_genes = chr_genes[chr_genes[win_size] == ptu]
-            start_idx = str(int(ptu_genes.head(1).start))
-            stop_idx = str(int(ptu_genes.tail(1).end))
-            strand = ptu_genes.reset_index().head(1).strand[0]
-            bed_rows.append([
-                chr_name, start_idx, stop_idx, ptu_name, '0', strand
-            ])
+            for ptu in chr_genes[win_size].unique():
+                ptu_name = "PTU%03d" % ptu_counter
+                ptu_genes = chr_genes[chr_genes[win_size] == ptu]
+                start_idx = str(int(ptu_genes.head(1).start))
+                stop_idx = str(int(ptu_genes.tail(1).end))
+                strand = ptu_genes.reset_index().head(1).strand[0]
+                bed_rows.append([
+                    chr_name, start_idx, stop_idx, ptu_name, '0', strand
+                ])
 
-            ptu_counter = ptu_counter + 1
+                ptu_counter = ptu_counter + 1
 
     # save result
     output_file = os.path.basename(input_file).replace('.gff', '_PTUs.csv')
@@ -135,7 +137,7 @@ def main():
     # Bed file
     fp = open(output_file.replace('.csv', '.bed'), 'w')
 
-    fp.write('track name="ColorByStrandDemo" description=' +
+    fp.write('track name="Polycistronic Transcriptional Units" description=' +
              '"Polycistronic Transcriptional Units" ' +
              'visibility=2 colorByStrand="31,168,137 168,30,62"\n')
     for row in bed_rows:
