@@ -18,6 +18,17 @@ a gap region.
 The input for this script are GFF annotations downloaded from TriTrypDB,
 modified to remove the FASTA sequence sections found at the end of the files.
 
+To generate such a GFF, you can do:
+
+    input_file='TriTrypDB-XX.gff'
+
+    last_line=$(expr $(grep --color='never' -nr "##FASTA" $input_file |\
+                awk '{print $input_file}' FS=":") - 1)
+    outfile=$(basename $input_file .gff)"_genes.gff"
+
+    head -n 3 $input_file > $outfile
+    head -n $last_line $input_file | grep --color='never' 'gene' >> $outfile
+
 Example usage:
 
     python polycistron_detection.py TriTrypDB-9.0_LmajorFriedlin_genes.gff
@@ -96,7 +107,16 @@ def main():
                 chr_genes['med_%d' % win_size] = np.asarray(segment_data(series))
 
         # break up groups that span gaps
-        gap_indices = chr_genes[chr_genes.start.diff() > gap_size].index
+
+        # Note: below code only compares CDS start positions so CDS will be
+        # included in gap size calculation.
+        #gap_indices = chr_genes[chr_genes.start.diff() > gap_size].index
+
+        # gap_indices indicates index of gene immediately following a
+        # sufficiently large gap
+        intergenic_distances = chr_genes[1:].start.values - chr_genes[:-1].end.values
+        is_gap = np.concatenate(([False], intergenic_distances > gap_size))
+        gap_indices = chr_genes.index[is_gap]
 
         for idx in gap_indices:
             for i in window_sizes:
