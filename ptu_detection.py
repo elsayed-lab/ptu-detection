@@ -44,10 +44,11 @@ from scipy.ndimage.filters import median_filter
 def main():
     """Main"""
     # specify window sizes to use
-    window_sizes = [3, 5, 9, 15, 49, 99]
+    window_sizes = [3, 5, 9, 15, 99]
 
     # maximum gap size to allow within a single PTU
-    gap_size = 15000
+    # gap_size = 15000
+    gap_size = 10000
 
     # first argument should be filepath
     input_file = sys.argv[1]
@@ -128,25 +129,37 @@ def main():
                 warnings.simplefilter("ignore")
                 chr_genes.group.loc[idx:] = (chr_genes.group.loc[idx:] + 1).values
 
-        # append results to output data frame
-        output = output.append(chr_genes[cols])
-
-        # add bed entries
+        # add bed entries and rename PTUs
         for win_size in ["med_%d" % x for x in window_sizes]:
-            # PTU counter
+            # Create PTU name mapping
+            ptu_mapping = {}
             ptu_counter = 1
 
             for ptu in chr_genes[win_size].unique():
-                ptu_name = "PTU%03d" % ptu_counter
+                ptu_mapping[ptu] = "%s_PTU%02d" % (chr_name, ptu_counter)
+                ptu_counter = ptu_counter + 1
+
+            # Rename PTUs, e.g. "1.0" -> "LmjF.01_PTU01"
+            #chr_genes[win_size] = chr_genes[win_size].apply(lambda x: "%s_PTU%02d" % (chr_name, x))
+            chr_genes[win_size] = chr_genes[win_size].map(ptu_mapping)
+
+            # Iterate over each PTU on the chromosome
+            for ptu in chr_genes[win_size].unique():
+                # Get genes for the PTU
                 ptu_genes = chr_genes[chr_genes[win_size] == ptu]
+
+                # Construct BED fields
                 start_idx = str(int(ptu_genes.head(1).start))
                 stop_idx = str(int(ptu_genes.tail(1).end))
                 strand = ptu_genes.reset_index().head(1).strand[0]
+
+                # Add bed entry
                 bed_rows.append([
-                    chr_name, start_idx, stop_idx, ptu_name, '0', strand
+                    chr_name, start_idx, stop_idx, ptu, '0', strand
                 ])
 
-                ptu_counter = ptu_counter + 1
+        # append results to output data frame
+        output = output.append(chr_genes[cols])
 
     # save result
     output_file = os.path.basename(input_file).replace('.gff', '_PTUs.csv')
