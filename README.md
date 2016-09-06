@@ -64,10 +64,36 @@ To aid in this assessment, a .bed file including the alternative mappings is
 created with can be loaded into a genome browser such as 
 [IGV](http://software.broadinstitute.org/software/igv/).
 
+For example, below is a screenshot for the same *T. cruzi* chromosome showing
+several possible PTU assignements resulting from different levels of smoothing.
+
 ![T. cruzi CL Brener Esmeraldo-like ch. 18 example PTU assignments](extra/example_screenshot.png)
+
+**Figure**: T. cruzi CL Brener Esmeraldo-like ch. 18 example showing
+alternate PTU assignments.
+
+- TriTrypDB chromosome, mRNA, and gene annotations are shown in **blue**.
+- Predicted PTU assignments for several different smoothing window sizes are
+  shown in **red**.
+
+In this case, one of the bottom three filtering levels (corresponding to window
+sizes of 3, 5, and 9) appear to best reflect the likely PTUs for that region.
+
+## Usage
+
+TODO...
+
+### Requirements
+
+- Python 3
+- SciPy
+
+### Running the script
+
+### Output
 
 ## Feedback
 
 Suggestions are welcome, either in the form of Github issues or pull requests,
-or [emails](mailto:khughitt@umd.edu).
+or via [email](mailto:khughitt@umd.edu).
 
