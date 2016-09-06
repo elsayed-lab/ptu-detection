@@ -6,14 +6,22 @@ Keith Hughitt <khughitt@umd.edu>
 Created:      2013/06/01
 Last updated: 2015/03/31
 
+The goal of this script is to generate a classification scheme which assigns
+each TriTryp gene to a category corresponding to its membership in a
+polycistronic transcription unit.
 
-The goal of this script is to assign each generate a classification scheme
-which assigns each TriTryp gene to a category corresponding to its membership
-in a polycistronic transcription unit.
+For each chromosome, a 1d vector with length = # genes on the chromosome 
+is created indicating the strands of genes as they appear on the chromosome,
+moving from location 0 to the end of the chromosome. 
 
-For each chromosome, genes are clustered based on strand. Genes are then
-assigned to tentative polycistronic units, or marked with 0 if it falls in
-a gap region.
+Next, smoothing is applied to add some robustness to small inter-PTU strand
+differences (i.e. one to several genes on the opposing strand within a larger
+cluster of same-strand genes).
+
+Finally, the smoothed strand vectors are segmented into individual PTUs.
+
+Based on some experimentation, a window-size of about 5 seems to product PTUs
+which overlap well the actual underlying PTU's, as observed in IGV.
 
 The input for this script are GFF annotations downloaded from TriTrypDB,
 modified to remove the FASTA sequence sections found at the end of the files.
@@ -31,7 +39,7 @@ To generate such a GFF, you can do:
 
 Example usage:
 
-    python polycistron_detection.py TriTrypDB-9.0_LmajorFriedlin_genes.gff
+    python ptu_detection.py TriTrypDB-28_LmajorFriedlin_genes.gff
 
 """
 import os
@@ -43,8 +51,8 @@ from scipy.ndimage.filters import median_filter
 
 def main():
     """Main"""
-    # specify window sizes to use
-    window_sizes = [3, 5, 9, 15, 99]
+    # specify window sizes to use (unit = gene-strand)
+    window_sizes = [3, 5, 9, 15]
 
     # maximum gap size to allow within a single PTU
     # gap_size = 15000
