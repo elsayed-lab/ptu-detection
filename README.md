@@ -27,7 +27,7 @@ of each gene, in order of their location on the chromosome, for example:
 Here a "0" indicates a gene on the negative strand, while a "1" indicates a
 gene on the positive strand.
 
-In this case, the script woulid most likely detect five PTUs - one for each
+In this case, the script would most likely detect five PTUs - one for each
 block on genes on the same strand.
 
 However, this is something of an idealized scenario. A more realistic example
@@ -58,14 +58,14 @@ window sizes ranging from 1 (no smoothing) to 15 (each gene takes on the
 average strand assignment of it's 7 neighbors on either side).
 
 It is then up to the user to compare these results, and choose the mapping
-which appears to best reflect the acutal PTU structure.
+which appears to best reflect the actual PTU structure.
 
 To aid in this assessment, a .bed file including the alternative mappings is
 created with can be loaded into a genome browser such as 
 [IGV](http://software.broadinstitute.org/software/igv/).
 
 For example, below is a screenshot for the same *T. cruzi* chromosome showing
-several possible PTU assignements resulting from different levels of smoothing.
+several possible PTU assignments resulting from different levels of smoothing.
 
 ![T. cruzi CL Brener Esmeraldo-like ch. 18 example PTU assignments](extra/example_screenshot.png)
 
@@ -79,9 +79,36 @@ alternate PTU assignments.
 In this case, one of the bottom three filtering levels (corresponding to window
 sizes of 3, 5, and 9) appear to best reflect the likely PTUs for that region.
 
+## Pre-existing PTU assignments
+
+For convenience, gene/PTU mappings have been generated for each of the
+organisms in TriTrypDB for which a GFF file is available.
+
+These mappings can be found in the `mappings/` directory of this repo, and were
+created using a smoothing window of size 5 (see above for details on how
+smoothing is used).
+
+Each file contains a command-separated list of gene/PTU values, e.g.:
+
+```
+gene_id,ptu
+LmjF.01.0010,LmjF.01_PTU01
+LmjF.01.0020,LmjF.01_PTU01
+LmjF.01.0030,LmjF.01_PTU01
+LmjF.01.0040,LmjF.01_PTU01
+LmjF.01.0050,LmjF.01_PTU01
+LmjF.01.0060,LmjF.01_PTU01
+```
+
+If you plan to use these mapping in your research, it is strongly recommended
+that you run the script yourself and verify that the appropriate smoothing
+parameters have been applied, as described above. Further manual edits to the
+mapping may also be desirable.
+
 ## Usage
 
 TODO...
+
 
 ### Requirements
 
