@@ -2,7 +2,8 @@
 #-*- coding:utf-8 -*-
 """
 Trypanosome polycistron detection
-Keith Hughitt <khughitt@umd.edu>
+
+Author:       Keith Hughitt <khughitt@umd.edu>
 Created:      2013/06/01
 Last updated: 2015/03/31
 
@@ -23,19 +24,9 @@ Finally, the smoothed strand vectors are segmented into individual PTUs.
 Based on some experimentation, a window-size of about 5 seems to product PTUs
 which overlap well the actual underlying PTU's, as observed in IGV.
 
-The input for this script are GFF annotations downloaded from TriTrypDB,
-modified to remove the FASTA sequence sections found at the end of the files.
-
-To generate such a GFF, you can do:
-
-    input_file='TriTrypDB-XX.gff'
-
-    last_line=$(expr $(grep --color='never' -nr "##FASTA" $input_file |\
-                awk '{print $input_file}' FS=":") - 1)
-    outfile=$(basename $input_file .gff)"_genes.gff"
-
-    head -n 3 $input_file > $outfile
-    head -n $last_line $input_file | grep --color='never' 'gene' >> $outfile
+The input for this script are GFF annotations downloaded from TriTrypDB. Note
+that if you are using an earlier version of TriTrypDB, the files may need to be
+edited to remove any FASTA sequences appended below the GFF contents.
 
 Example usage:
 
@@ -52,10 +43,9 @@ from scipy.ndimage.filters import median_filter
 def main():
     """Main"""
     # specify window sizes to use (unit = gene-strand)
-    window_sizes = [3, 5, 9, 15]
+    window_sizes = [1, 3, 5, 9, 15]
 
     # maximum gap size to allow within a single PTU
-    # gap_size = 15000
     gap_size = 10000
 
     # first argument should be filepath
