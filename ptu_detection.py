@@ -30,7 +30,7 @@ edited to remove any FASTA sequences appended below the GFF contents.
 
 Example usage:
 
-    python ptu_detection.py TriTrypDB-28_LmajorFriedlin_genes.gff
+    python ptu_detection.py TriTrypDB-29_LmajorFriedlin_genes.gff
 
 """
 import os
@@ -80,11 +80,11 @@ def main():
         # resort by location (snoRNAs, etc. sometimes follow genes in GFF)
         chr_genes = chr_genes.sort('start').reset_index()
 
+        # parse gene IDs
         with warnings.catch_warnings():
-            # parse gene IDs
             gene_ids = []
             for attr_parts in chr_genes.attribute.str.split(';'):
-                gene_ids.append(attr_parts[1][5:])
+                gene_ids.append(attr_parts[0][3:])
             
             # add gene_ids
             warnings.simplefilter("ignore")
